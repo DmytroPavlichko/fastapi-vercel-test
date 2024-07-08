@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    await bot.session.close()
+    #await bot.session.close()
 
 
 app = FastAPI(lifespan=lifespan)
