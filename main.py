@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import time
 import logging
 import os
+import uvicorn
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
@@ -63,5 +64,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    import uvicorn
     uvicorn.run(app)
