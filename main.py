@@ -48,8 +48,7 @@ telegram_update = "Empty"
 async def bot_webhook(update: dict):
     global telegram_update
     telegram_update = Update(**update)
-    await dp.feed_update(bot, telegram_update)
-    return "telegram_update"
+    await dp.feed_raw_update(bot, update)
 
 
 @app.on_event("shutdown")
