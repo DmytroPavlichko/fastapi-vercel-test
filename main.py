@@ -42,9 +42,11 @@ async def main_handler(message: Message):
         logging.info(f'Main: {user_id} {user_full_name} {time.asctime()}. Message: {message}. Error in main_handler')
         await message.reply("Something went wrong...")
 
+telegram_update = "Empty"
 
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
+    global telegram_update
     telegram_update = Update(**update)
     await dp.feed_update(bot, telegram_update)
     return "telegram_update"
@@ -57,7 +59,7 @@ async def on_shutdown():
 
 @app.get('/')
 def hello_world():
-    return "Hello,World"
+    return telegram_update
 
 
 if __name__ == '__main__':
