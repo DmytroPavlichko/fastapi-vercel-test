@@ -50,7 +50,6 @@ async def bot_webhook(update: dict):
     global telegram_update
     telegram_update = Update(**update)
     await dp.feed_raw_update(bot, update)
-    await bot.get_session().close()
 
 
 @app.on_event("shutdown")
