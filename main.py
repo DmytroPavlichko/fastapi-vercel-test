@@ -3,7 +3,9 @@ import time
 import logging
 import os
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
+from aiogram.filters import CommandStart
+from aiogram.types import Message, Update
 
 TOKEN = os.getenv('TOKEN')
 
@@ -13,7 +15,7 @@ WEBHOOK_URL = "https://" + RENDER_WEB_SERVICE_NAME + ".vercel.app" + WEBHOOK_PAT
 
 logging.basicConfig(filemode='a', level=logging.INFO)
 bot = Bot(token=TOKEN)
-dp = Dispatcher(bot=bot)
+dp = Dispatcher()
 
 app = FastAPI()
 
@@ -25,15 +27,12 @@ async def on_startup():
             url=WEBHOOK_URL
         )
 
-@dp.message_handler(commands=['start'])
-async def start_handler(message: types.Message):
-    user_id = message.from_user.id
-    user_full_name = message.from_user.full_name
-    logging.info(f'Start: {user_id} {user_full_name} {time.asctime()}. Message: {message}')
-    await message.reply(f"Hello, {user_full_name}!")
+@dp.message(CommandStart())
+async def start_handler(message: Message):
+    await message.reply("Hello!")
 
-@dp.message_handler()
-async def main_handler(message: types.Message):
+@dp.message()
+async def main_handler(message: Message):
     try:
         user_id = message.from_user.id
         user_full_name = message.from_user.full_name
@@ -41,15 +40,13 @@ async def main_handler(message: types.Message):
         await message.reply("Hello world!")
     except:
         logging.info(f'Main: {user_id} {user_full_name} {time.asctime()}. Message: {message}. Error in main_handler')
-        await message.reply("Something went wrong...")  
+        await message.reply("Something went wrong...")
 
 
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
-    telegram_update = types.Update(**update)
-    Dispatcher.set_current(dp)
-    Bot.set_current(bot)
-    await dp.process_update(telegram_update)
+    telegram_update = Update(**update)
+    await dp.feed_update(bot, telegram_update)
 
 
 @app.on_event("shutdown")
