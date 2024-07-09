@@ -1,4 +1,3 @@
 fastapi
-aiogram
+aiogram==2.22.2
 uvicorn
-gunicorn
