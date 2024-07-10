@@ -51,7 +51,7 @@ async def main_handler(message: Message):
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
     await dp.feed_raw_update(bot, update)
-    await bot.session.close()
+    # await bot.session.close()
 
 
 @app.get('/')
