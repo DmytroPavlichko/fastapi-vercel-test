@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import time
 import logging
@@ -18,15 +19,18 @@ logging.basicConfig(filemode='a', level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-app = FastAPI()
-
-@app.on_event("startup")
-async def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     webhook_info = await bot.get_webhook_info()
     if webhook_info.url != WEBHOOK_URL:
-        await bot.set_webhook(
-            url=WEBHOOK_URL
-        )
+        await bot.set_webhook(url=WEBHOOK_URL)
+
+    yield
+
+    await bot.session.close()
+
+
+app = FastAPI(lifespan=lifespan)
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
@@ -43,24 +47,16 @@ async def main_handler(message: Message):
         logging.info(f'Main: {user_id} {user_full_name} {time.asctime()}. Message: {message}. Error in main_handler')
         await message.reply("Something went wrong...")
 
-telegram_update = "Empty"
 
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(update: dict):
-    global telegram_update
-    telegram_update = Update(**update)
     await dp.feed_raw_update(bot, update)
-    await bot.session.close()
-
-
-@app.on_event("shutdown")
-async def on_shutdown():
     await bot.session.close()
 
 
 @app.get('/')
 def hello_world():
-    return telegram_update
+    return "Hello"
 
 
 if __name__ == '__main__':
